@@ -6,30 +6,41 @@ const PUBLIC_DIR = "public";
 const STATIC_DIR = "static";
 const timeout = require('connect-timeout')
 
+var cors_proxy = require('cors-anywhere');
+
 const app = express();
 
-const net = require("net");
-const server = net.createServer({
-    requireHeader: ['origin', 'x-requested-with'],
-    removeHeaders: [
-        'cookie',
-        'cookie2',
-        // Strip Heroku-specific headers
-        'x-request-start',
-        'x-request-id',
-        'via',
-        'connect-time',
-        'total-route-time',
-        // Other Heroku added debug headers
-        // 'x-forwarded-for',
-        // 'x-forwarded-proto',
-        // 'x-forwarded-port',
-    ],
-    redirectSameOrigin: true,
-    httpProxyOptions: {
-        // Do not add X-Forwarded-For, etc. headers, because Heroku already adds it.
-        xfwd: false,
-    }
+const net = require("net")
+
+var host = process.env.HOST || '0.0.0.0';
+// Listen on a specific port via the PORT environment variable
+var port = process.env.PORT || 909;
+
+var cors_proxy = require('cors-anywhere');
+let server = net.createServer({
+    originWhitelist: [],
+  requireHeader: ['origin', 'x-requested-with'],
+  removeHeaders: [
+    'cookie',
+    'cookie2',
+    // Strip Heroku-specific headers
+    'x-request-start',
+    'x-request-id',
+    'via',
+    'connect-time',
+    'total-route-time',
+    // Other Heroku added debug headers
+    // 'x-forwarded-for',
+    // 'x-forwarded-proto',
+    // 'x-forwarded-port',
+  ],
+  redirectSameOrigin: true,
+  httpProxyOptions: {
+    // Do not add X-Forwarded-For, etc. headers, because Heroku already adds it.
+    xfwd: false,
+  },
+}).listen(port, host, function() {
+  console.log('Running CORS Anywhere on ' + host + ':' + port);
 });
 
 server.on("connection", (clientToProxySocket) => {
@@ -94,15 +105,15 @@ server.on("close", () => {
     console.log("Client disconnected");
 });
 
-server.listen(
-    {
-        host: process.env.HOST || "0.0.0.0",
-        port: process.env.PORT || 909,
-    },
-    () => {
-        console.log("Server listening on 0.0.0.0:909");
-    }
-);
+// server.listen(
+//     {
+//         host: process.env.HOST || "0.0.0.0",
+//         port: process.env.PORT || 909,
+//     },
+//     () => {
+//         console.log("Server listening on 0.0.0.0:909");
+//     }
+// );
 
 // var http = require('http');
 // var httpProxy = require('http-proxy');
