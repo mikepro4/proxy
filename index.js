@@ -19,7 +19,6 @@ var port = process.env.PORT || 909;
 var cors_proxy = require('cors-anywhere');
 let server = net.createServer({
     originWhitelist: [],
-  requireHeader: ['origin', 'x-requested-with'],
   removeHeaders: [
     'cookie',
     'cookie2',
