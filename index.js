@@ -76,7 +76,7 @@ server.on("close", () => {
 server.listen(
     {
         host: "0.0.0.0",
-        port: 909,
+        port: process.env.PORT || 909,
     },
     () => {
         console.log("Server listening on 0.0.0.0:909");
