@@ -17,7 +17,7 @@ var host = process.env.HOST || '0.0.0.0';
 var port = process.env.PORT || 909;
 
 var cors_proxy = require('cors-anywhere');
-let server = net.createServer({
+let server = cors_proxy.createServer({
     originWhitelist: [],
   removeHeaders: [
     'cookie',
@@ -42,67 +42,67 @@ let server = net.createServer({
   console.log('Running CORS Anywhere on ' + host + ':' + port);
 });
 
-server.on("connection", (clientToProxySocket) => {
-    console.log("Client connected to proxy");
-    clientToProxySocket.once("data", (data) => {
-        let isTLSConnection = data.toString().indexOf("CONNECT") !== -1;
+// server.on("connection", (clientToProxySocket) => {
+//     console.log("Client connected to proxy");
+//     clientToProxySocket.once("data", (data) => {
+//         let isTLSConnection = data.toString().indexOf("CONNECT") !== -1;
 
-        let serverPort = 80;
-        let serverAddress;
-        console.log(data.toString());
-        if (isTLSConnection) {
-            serverPort = 443;
-            serverAddress = data
-                .toString()
-                .split("CONNECT")[1]
-                .split(" ")[1]
-                .split(":")[0];
-        } else {
-            serverAddress = data.toString().split("Host: ")[1].split("\r\n")[0];
-        }
-        console.log(serverAddress);
+//         let serverPort = 80;
+//         let serverAddress;
+//         console.log(data.toString());
+//         if (isTLSConnection) {
+//             serverPort = 443;
+//             serverAddress = data
+//                 .toString()
+//                 .split("CONNECT")[1]
+//                 .split(" ")[1]
+//                 .split(":")[0];
+//         } else {
+//             serverAddress = data.toString().split("Host: ")[1].split("\r\n")[0];
+//         }
+//         console.log(serverAddress);
 
-        // Creating a connection from proxy to destination server
-        let proxyToServerSocket = net.createConnection(
-            {
-                host: serverAddress,
-                port: serverPort,
-            },
-            (data) => {
-                console.log("Proxy to server set up");
-            }
-        );
+//         // Creating a connection from proxy to destination server
+//         let proxyToServerSocket = net.createConnection(
+//             {
+//                 host: serverAddress,
+//                 port: serverPort,
+//             },
+//             (data) => {
+//                 console.log("Proxy to server set up");
+//             }
+//         );
 
 
-        if (isTLSConnection) {
-            clientToProxySocket.write("HTTP/1.1 200 OK\r\n\r\n");
-        } else {
-            proxyToServerSocket.write(data);
-        }
+//         if (isTLSConnection) {
+//             clientToProxySocket.write("HTTP/1.1 200 OK\r\n\r\n");
+//         } else {
+//             proxyToServerSocket.write(data);
+//         }
 
-        clientToProxySocket.pipe(proxyToServerSocket);
-        proxyToServerSocket.pipe(clientToProxySocket);
+//         clientToProxySocket.pipe(proxyToServerSocket);
+//         proxyToServerSocket.pipe(clientToProxySocket);
 
-        proxyToServerSocket.on("error", (err) => {
-            console.log("Proxy to server error");
-            console.log(err);
-        });
+//         proxyToServerSocket.on("error", (err) => {
+//             console.log("Proxy to server error");
+//             console.log(err);
+//         });
 
-        clientToProxySocket.on("error", (err) => {
-            console.log("Client to proxy error");
-            console.log(err)
-        });
-    });
-});
+//         clientToProxySocket.on("error", (err) => {
+//             console.log("Client to proxy error");
+//             console.log(err)
+//         });
+//     });
+// });
 
-server.on("error", (err) => {
-    console.log("Some internal server error occurred");
-    console.log(err);
-});
+// server.on("error", (err) => {
+//     console.log("Some internal server error occurred");
+//     console.log(err);
+// });
 
-server.on("close", () => {
-    console.log("Client disconnected");
-});
+// server.on("close", () => {
+//     console.log("Client disconnected");
+// });
 
 // server.listen(
 //     {
